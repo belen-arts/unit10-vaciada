@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaciada — map to cloth</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- top search bar -->
+    <div id="topbar">
+      <span class="wordmark">VACIADA /</span>
+      <div id="search-wrap">
+        <input id="place-input" type="text" placeholder="search a place — granadilla, españa…" />
+        <button id="search-btn">search</button>
+      </div>
+    </div>
+
+    <!-- mode toolbar -->
+    <div id="toolbar">
+      <button class="tool-btn active" id="btn-pan">pan</button>
+      <button class="tool-btn" id="btn-centre">set centre</button>
+      <button class="tool-btn" id="btn-draw">draw lines</button>
+      <div id="status">no centre set</div>
+    </div>
+
+    <!-- main area: map + sidebar -->
+    <div id="main-row">
+
+      <div id="map-wrap">
+        <div id="map"></div>
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div id="sidebar">
+        <div id="sidebar-header">fold lines</div>
+        <div id="lines-list">
+          <p class="empty-msg">set a centre point,<br>then draw lines<br>from it outward.</p>
+        </div>
+        <div id="sidebar-footer">
+          <p id="sidebar-hint">click any angle to copy</p>
+          <button id="clear-btn">clear all lines</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="main.js"></script>
+
+</body>
+</html>
