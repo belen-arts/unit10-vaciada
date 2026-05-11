@@ -26,9 +26,11 @@
     <!-- mode toolbar -->
     <div id="toolbar">
       <button class="tool-btn active" id="btn-pan">pan</button>
-      <button class="tool-btn" id="btn-centre">set centre</button>
+      <button class="tool-btn" id="btn-zone">draw zone</button>
       <button class="tool-btn" id="btn-draw">draw lines</button>
-      <div id="status">no centre set</div>
+      <button class="tool-btn" id="btn-clear-zone">clear zone</button>
+      <button class="tool-btn" id="btn-export">export .fold</button>
+      <div id="status">no zone set</div>
     </div>
 
     <!-- main area: map + sidebar -->
@@ -42,10 +44,10 @@
       <div id="sidebar">
         <div id="sidebar-header">fold lines</div>
         <div id="lines-list">
-          <p class="empty-msg">set a centre point,<br>then draw lines<br>from it outward.</p>
+          <p class="empty-msg">draw a zone,<br>then add fold<br>lines inside it.</p>
         </div>
         <div id="sidebar-footer">
-          <p id="sidebar-hint">click any angle to copy</p>
+          <p id="sidebar-hint">M = mountain · V = valley</p>
           <button id="clear-btn">clear all lines</button>
         </div>
       </div>

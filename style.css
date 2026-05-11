@@ -156,6 +156,17 @@ html, body {
   height: 100%;
 }
 
+/* keep leaflet layers below our canvas */
+.leaflet-pane {
+  z-index: 400 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 500 !important;
+}
+
+/* canvas sits above the map */
 #canvas {
   position: absolute;
   top: 0;
@@ -163,11 +174,12 @@ html, body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 1000;
 }
 
-#canvas.mode-centre {
+#canvas.mode-zone {
   pointer-events: all;
-  cursor: cell;
+  cursor: crosshair;
 }
 
 #canvas.mode-draw {

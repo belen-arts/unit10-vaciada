@@ -1,5 +1,6 @@
-import { initMap, searchPlace } from './map.js'
-import { initCanvas }           from './lines.js'
+import { initMap, searchPlace }  from './map.js'
+import { initCanvas, getLines, getZone } from './lines.js'
+import { exportFOLD }            from './export.js'
 
 // ── boot ──────────────────────────────────────────────────────────────────
 
@@ -25,3 +26,9 @@ input.addEventListener('keydown', e => { if (e.key === 'Enter') search() })
 // load Granadilla on start
 input.value = 'Granadilla, Cáceres'
 search()
+
+// ── export ────────────────────────────────────────────────────────────────
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  exportFOLD(getZone(), getLines(), map)
+})
