@@ -15,6 +15,7 @@
   --rule:   #ccc9bf;
   --muted:  #888880;
   --accent: #c0392b;
+  --blue:   #2563a8;
 }
 
 /* ── base ────────────────────────────────────────────────────────────────── */
@@ -32,6 +33,7 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden;
 }
 
 /* ── topbar ──────────────────────────────────────────────────────────────── */
@@ -71,9 +73,7 @@ html, body {
   outline: none;
 }
 
-#place-input:focus {
-  border-color: #888;
-}
+#place-input:focus { border-color: #888; }
 
 #search-btn {
   font-family: 'IBM Plex Mono', monospace;
@@ -87,9 +87,7 @@ html, body {
   letter-spacing: .05em;
 }
 
-#search-btn:hover {
-  background: #333;
-}
+#search-btn:hover { background: #333; }
 
 /* ── toolbar ─────────────────────────────────────────────────────────────── */
 
@@ -113,15 +111,8 @@ html, body {
   letter-spacing: .05em;
 }
 
-.tool-btn:hover {
-  background: #e0dbd0;
-  color: var(--ink);
-}
-
-.tool-btn.active {
-  background: var(--ink);
-  color: var(--paper);
-}
+.tool-btn:hover { background: #e0dbd0; color: var(--ink); }
+.tool-btn.active { background: var(--ink); color: var(--paper); }
 
 #status {
   margin-left: auto;
@@ -133,18 +124,25 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 300px;
+  max-width: 260px;
 }
 
-/* ── main row ────────────────────────────────────────────────────────────── */
+/* ── split row ───────────────────────────────────────────────────────────── */
 
-#main-row {
+#split-row {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* ── map ─────────────────────────────────────────────────────────────────── */
+/* ── left panel ──────────────────────────────────────────────────────────── */
+
+#left-panel {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  border-right: 1px solid var(--rule);
+}
 
 #map-wrap {
   position: relative;
@@ -156,41 +154,25 @@ html, body {
   height: 100%;
 }
 
-/* keep leaflet layers below our canvas */
-.leaflet-pane {
-  z-index: 400 !important;
-}
-
+.leaflet-pane   { z-index: 400 !important; }
 .leaflet-top,
-.leaflet-bottom {
-  z-index: 500 !important;
-}
+.leaflet-bottom { z-index: 500 !important; }
 
-/* canvas sits above the map */
 #canvas {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   pointer-events: none;
   z-index: 1000;
 }
 
-#canvas.mode-zone {
-  pointer-events: all;
-  cursor: crosshair;
-}
-
-#canvas.mode-draw {
-  pointer-events: all;
-  cursor: crosshair;
-}
+#canvas.mode-zone { pointer-events: all; cursor: crosshair; }
+#canvas.mode-draw { pointer-events: all; cursor: crosshair; }
 
 /* ── sidebar ─────────────────────────────────────────────────────────────── */
 
 #sidebar {
-  width: 190px;
+  width: 170px;
   flex-shrink: 0;
   border-left: 1px solid var(--rule);
   background: var(--mid);
@@ -227,18 +209,41 @@ html, body {
   justify-content: space-between;
   padding: 5px 0;
   border-bottom: 1px solid #ddd9ce;
+  gap: 4px;
 }
 
 .line-angle {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--ink);
   cursor: pointer;
   letter-spacing: .02em;
+  flex: 1;
 }
 
-.line-angle:hover {
-  color: var(--accent);
+.line-angle:hover { color: var(--accent); }
+
+.fold-toggle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  letter-spacing: .05em;
+}
+
+.fold-m {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.fold-v {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
 }
 
 .del-btn {
@@ -252,9 +257,7 @@ html, body {
   padding: 0 2px;
 }
 
-.del-btn:hover {
-  color: var(--accent);
-}
+.del-btn:hover { color: var(--accent); }
 
 #sidebar-footer {
   padding: 10px 12px;
@@ -283,7 +286,84 @@ html, body {
   letter-spacing: .04em;
 }
 
-#clear-btn:hover {
-  background: #e0dbd0;
-  color: var(--ink);
+#clear-btn:hover { background: #e0dbd0; color: var(--ink); }
+
+/* ── right panel ─────────────────────────────────────────────────────────── */
+
+#right-panel {
+  width: 45%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  overflow: hidden;
 }
+
+#fold-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.panel-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: #666;
+  white-space: nowrap;
+}
+
+#slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.slider-label {
+  font-size: 10px;
+  color: #555;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+#fold-slider {
+  flex: 1;
+  max-width: 180px;
+  accent-color: #c0392b;
+  cursor: pointer;
+}
+
+#fold-canvas-wrap {
+  flex: 1;
+  position: relative;
+}
+
+#fold-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#fold-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#fold-empty p {
+  font-size: 11px;
+  color: #444;
+  text-align: center;
+  line-height: 1.8;
+  letter-spacing: .04em;
+}
+
+#fold-empty.hidden { display: none; }

@@ -14,7 +14,7 @@
 
   <div id="app">
 
-    <!-- top search bar -->
+    <!-- top bar -->
     <div id="topbar">
       <span class="wordmark">VACIADA /</span>
       <div id="search-wrap">
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <!-- mode toolbar -->
+    <!-- toolbar -->
     <div id="toolbar">
       <button class="tool-btn active" id="btn-pan">pan</button>
       <button class="tool-btn" id="btn-zone">draw zone</button>
@@ -33,22 +33,42 @@
       <div id="status">no zone set</div>
     </div>
 
-    <!-- main area: map + sidebar -->
-    <div id="main-row">
+    <!-- split: map | fold preview -->
+    <div id="split-row">
 
-      <div id="map-wrap">
-        <div id="map"></div>
-        <canvas id="canvas"></canvas>
+      <!-- LEFT: map + sidebar -->
+      <div id="left-panel">
+        <div id="map-wrap">
+          <div id="map"></div>
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="sidebar">
+          <div id="sidebar-header">fold lines</div>
+          <div id="lines-list">
+            <p class="empty-msg">draw a zone,<br>then add fold<br>lines inside it.</p>
+          </div>
+          <div id="sidebar-footer">
+            <p id="sidebar-hint">M = mountain · V = valley</p>
+            <button id="clear-btn">clear all lines</button>
+          </div>
+        </div>
       </div>
 
-      <div id="sidebar">
-        <div id="sidebar-header">fold lines</div>
-        <div id="lines-list">
-          <p class="empty-msg">draw a zone,<br>then add fold<br>lines inside it.</p>
+      <!-- RIGHT: fold simulation -->
+      <div id="right-panel">
+        <div id="fold-header">
+          <span class="panel-label">FOLD SIMULATION</span>
+          <div id="slider-wrap">
+            <span class="slider-label">0%</span>
+            <input type="range" id="fold-slider" min="0" max="100" value="0" />
+            <span class="slider-label">100%</span>
+          </div>
         </div>
-        <div id="sidebar-footer">
-          <p id="sidebar-hint">M = mountain · V = valley</p>
-          <button id="clear-btn">clear all lines</button>
+        <div id="fold-canvas-wrap">
+          <canvas id="fold-canvas"></canvas>
+          <div id="fold-empty">
+            <p>draw a zone and<br>fold lines to see<br>the simulation</p>
+          </div>
         </div>
       </div>
 
@@ -56,6 +76,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
   <script type="module" src="main.js"></script>
 
 </body>

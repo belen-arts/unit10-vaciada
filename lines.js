@@ -66,6 +66,7 @@ export function initCanvas(mapInstance) {
     map.dragging.enable()
     setMode('pan')
     redraw()
+    window.onLinesChanged?.()
   })
 
   clearBtn.addEventListener('click', () => {
@@ -73,6 +74,7 @@ export function initCanvas(mapInstance) {
     lineStart = null
     renderList()
     redraw()
+    window.onLinesChanged?.()
   })
 }
 
@@ -220,7 +222,7 @@ function onContainerClick(e) {
     return
   }
 
-  // ── draw mode: click edge to edge ─────────────────────────────────────
+  // ── draw mode: click edge to edge ──────────────────────────────────────
   if (mode === 'draw' && zoneBounds) {
     const r = getZoneRect()
 
@@ -240,13 +242,13 @@ function onContainerClick(e) {
       const p1    = llToXY(lineStart)
       const p2    = llToXY(ll)
       const angle = angleDeg(p1.x, p1.y, p2.x, p2.y)
-      // default fold assignment is Mountain
       lines.push({ start: lineStart, end: ll, angle, fold: 'M' })
       lineStart = null
       previewPt = null
       setStatus('line added — toggle M/V in sidebar, or add next line')
       renderList()
       redraw()
+      window.onLinesChanged?.()
     }
   }
 }
@@ -381,6 +383,7 @@ function renderList() {
       lines[i].fold = lines[i].fold === 'M' ? 'V' : 'M'
       renderList()
       redraw()
+      window.onLinesChanged?.()
     })
   })
 
@@ -389,6 +392,7 @@ function renderList() {
       lines.splice(+el.dataset.index, 1)
       renderList()
       redraw()
+      window.onLinesChanged?.()
     })
   })
 }

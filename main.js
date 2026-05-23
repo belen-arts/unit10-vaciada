@@ -1,11 +1,13 @@
-import { initMap, searchPlace }  from './map.js'
-import { initCanvas, getLines, getZone } from './lines.js'
-import { exportFOLD }            from './export.js'
+import { initMap, searchPlace }            from './map.js'
+import { initCanvas, getLines, getZone }   from './lines.js'
+import { exportFOLD }                      from './export.js'
+import { initFoldPreview, updateFoldPreview } from './fold-preview.js'
 
 // ── boot ──────────────────────────────────────────────────────────────────
 
 const map = initMap('map')
 initCanvas(map)
+initFoldPreview()
 
 // ── search ────────────────────────────────────────────────────────────────
 
@@ -23,7 +25,6 @@ async function search() {
 btn.addEventListener('click', search)
 input.addEventListener('keydown', e => { if (e.key === 'Enter') search() })
 
-// load Granadilla on start
 input.value = 'Granadilla, Cáceres'
 search()
 
@@ -32,3 +33,11 @@ search()
 document.getElementById('btn-export').addEventListener('click', () => {
   exportFOLD(getZone(), getLines(), map)
 })
+
+// ── fold preview sync ─────────────────────────────────────────────────────
+// Called by lines.js whenever lines change — exposed on window so lines.js
+// can call it without a circular import
+
+window.onLinesChanged = () => {
+  updateFoldPreview(getZone(), getLines(), map)
+}
