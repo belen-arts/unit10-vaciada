@@ -21,6 +21,8 @@
         <input id="place-input" type="text" placeholder="search a place — granadilla, españa…" />
         <button id="search-btn">search</button>
       </div>
+      <button class="top-btn" id="btn-instructions">instructions</button>
+      <button class="top-btn" id="btn-archive">archive</button>
     </div>
 
     <!-- toolbar -->
@@ -30,10 +32,11 @@
       <button class="tool-btn" id="btn-draw">draw lines</button>
       <button class="tool-btn" id="btn-clear-zone">clear zone</button>
       <button class="tool-btn" id="btn-export">export .fold</button>
+      <button class="tool-btn highlight" id="btn-save">save fold</button>
       <div id="status">no zone set</div>
     </div>
 
-    <!-- split: map | fold preview -->
+    <!-- main split -->
     <div id="split-row">
 
       <!-- LEFT: map + sidebar -->
@@ -54,6 +57,9 @@
         </div>
       </div>
 
+      <!-- DIVIDER -->
+      <div id="divider"></div>
+
       <!-- RIGHT: fold simulation -->
       <div id="right-panel">
         <div id="fold-header">
@@ -72,6 +78,120 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ── INSTRUCTIONS OVERLAY ────────────────────────────────────────────── -->
+  <div id="overlay-instructions" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-header">
+        <span class="overlay-title">HOW TO USE VACIADA</span>
+        <button class="overlay-close" data-close="overlay-instructions">×</button>
+      </div>
+      <div class="overlay-body instructions-body">
+        <div class="step">
+          <span class="step-num">01</span>
+          <div class="step-text">
+            <strong>search a place</strong>
+            <p>Type any community, town or village in the search bar. The map will navigate there.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <div class="step-text">
+            <strong>draw a zone</strong>
+            <p>Click "draw zone" then click two corners on the map to define your cloth rectangle. This is your piece of cloth.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <div class="step-text">
+            <strong>draw fold lines</strong>
+            <p>Click "draw lines" then click on the zone edge to place each end of a fold line. Lines must run edge to edge.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <div class="step-text">
+            <strong>assign mountain / valley</strong>
+            <p>Each line in the sidebar shows M or V. Click to toggle. Red = mountain fold. Blue = valley fold.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">05</span>
+          <div class="step-text">
+            <strong>simulate the fold</strong>
+            <p>Use the slider on the right panel to fold the cloth. Drag to rotate the 3D view.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">06</span>
+          <div class="step-text">
+            <strong>save your fold</strong>
+            <p>When you are done, click "save fold". Enter your name and why you chose this community. Your fold becomes part of the permanent archive.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SAVE FOLD OVERLAY ───────────────────────────────────────────────── -->
+  <div id="overlay-save" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-header">
+        <span class="overlay-title">SAVE YOUR FOLD</span>
+        <button class="overlay-close" data-close="overlay-save">×</button>
+      </div>
+      <div class="overlay-body">
+        <p class="save-intro">Your fold will be added to the permanent archive and visible to everyone who uses this tool.</p>
+        <div class="form-field">
+          <label for="save-name">your name</label>
+          <input type="text" id="save-name" placeholder="e.g. María, Anonymous…" />
+        </div>
+        <div class="form-field">
+          <label for="save-community">community you chose</label>
+          <input type="text" id="save-community" placeholder="e.g. Granadilla, Cáceres" />
+        </div>
+        <div class="form-field">
+          <label for="save-reason">why did you choose this place?</label>
+          <textarea id="save-reason" rows="3" placeholder="A few words about your connection to this place…"></textarea>
+        </div>
+        <div class="form-actions">
+          <button id="btn-save-confirm">add to archive</button>
+          <button class="btn-cancel" data-close="overlay-save">cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ARCHIVE OVERLAY ────────────────────────────────────────────────── -->
+  <div id="overlay-archive" class="overlay hidden">
+    <div class="overlay-box overlay-wide">
+      <div class="overlay-header">
+        <span class="overlay-title">FOLD ARCHIVE</span>
+        <button class="overlay-close" data-close="overlay-archive">×</button>
+      </div>
+      <div class="overlay-body">
+        <p class="save-intro">Every fold made with this tool. Click an entry to see it on the map.</p>
+        <div id="archive-list">
+          <p class="empty-msg">no folds saved yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOLD VIEWER OVERLAY ────────────────────────────────────────────── -->
+  <div id="overlay-view" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-header">
+        <span class="overlay-title" id="view-title">—</span>
+        <button class="overlay-close" data-close="overlay-view">×</button>
+      </div>
+      <div class="overlay-body">
+        <p id="view-community" class="view-meta"></p>
+        <p id="view-reason" class="view-reason"></p>
+        <p id="view-date" class="view-date"></p>
+      </div>
     </div>
   </div>
 
