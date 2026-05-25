@@ -7,14 +7,13 @@
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <div id="app">
 
-    <!-- top bar -->
     <div id="topbar">
       <span class="wordmark">VACIADA /</span>
       <div id="search-wrap">
@@ -25,21 +24,18 @@
       <button class="top-btn" id="btn-archive">archive</button>
     </div>
 
-    <!-- toolbar -->
     <div id="toolbar">
       <button class="tool-btn active" id="btn-pan">pan</button>
       <button class="tool-btn" id="btn-zone">draw zone</button>
       <button class="tool-btn" id="btn-draw">draw lines</button>
       <button class="tool-btn" id="btn-clear-zone">clear zone</button>
-      <button class="tool-btn" id="btn-export">export .fold</button>
       <button class="tool-btn highlight" id="btn-save">save fold</button>
+      <button class="tool-btn" id="btn-close-fold">close fold</button>
       <div id="status">no zone set</div>
     </div>
 
-    <!-- main split -->
     <div id="split-row">
 
-      <!-- LEFT: map + sidebar -->
       <div id="left-panel">
         <div id="map-wrap">
           <div id="map"></div>
@@ -51,29 +47,41 @@
             <p class="empty-msg">draw a zone,<br>then add fold<br>lines inside it.</p>
           </div>
           <div id="sidebar-footer">
-            <p id="sidebar-hint">M = mountain · V = valley</p>
+            <p id="sidebar-hint">M = mountain<br>V = valley</p>
             <button id="clear-btn">clear all lines</button>
           </div>
         </div>
       </div>
 
-      <!-- DIVIDER -->
       <div id="divider"></div>
 
-      <!-- RIGHT: fold simulation -->
       <div id="right-panel">
         <div id="fold-header">
           <span class="panel-label">FOLD SIMULATION</span>
           <div id="slider-wrap">
-            <span class="slider-label">0%</span>
+            <span class="slider-label">flat</span>
             <input type="range" id="fold-slider" min="0" max="100" value="0" />
-            <span class="slider-label">100%</span>
+            <span class="slider-label">folded</span>
+            <span id="fold-pct">0%</span>
           </div>
         </div>
         <div id="fold-canvas-wrap">
           <canvas id="fold-canvas"></canvas>
           <div id="fold-empty">
-            <p>draw a zone and<br>fold lines to see<br>the simulation</p>
+            <p>draw a zone and<br>fold lines on the map<br>to see the simulation</p>
+          </div>
+        </div>
+        <div id="fold-hint">
+          drag to rotate · scroll to zoom · use slider to fold
+        </div>
+        <div id="fold-legend">
+          <div class="legend-item">
+            <div class="legend-line legend-m"></div>
+            <span>mountain fold</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line legend-v"></div>
+            <span>valley fold</span>
           </div>
         </div>
       </div>
@@ -81,7 +89,7 @@
     </div>
   </div>
 
-  <!-- ── INSTRUCTIONS OVERLAY ────────────────────────────────────────────── -->
+  <!-- INSTRUCTIONS -->
   <div id="overlay-instructions" class="overlay hidden">
     <div class="overlay-box">
       <div class="overlay-header">
@@ -100,21 +108,21 @@
           <span class="step-num">02</span>
           <div class="step-text">
             <strong>draw a zone</strong>
-            <p>Click "draw zone" then click two corners on the map to define your cloth rectangle. This is your piece of cloth.</p>
+            <p>Click "draw zone" then click two corners on the map to define your cloth rectangle.</p>
           </div>
         </div>
         <div class="step">
           <span class="step-num">03</span>
           <div class="step-text">
             <strong>draw fold lines</strong>
-            <p>Click "draw lines" then click on the zone edge to place each end of a fold line. Lines must run edge to edge.</p>
+            <p>Click "draw lines" then click on the zone edge to place each end of a fold line. Lines run edge to edge.</p>
           </div>
         </div>
         <div class="step">
           <span class="step-num">04</span>
           <div class="step-text">
             <strong>assign mountain / valley</strong>
-            <p>Each line in the sidebar shows M or V. Click to toggle. Red = mountain fold. Blue = valley fold.</p>
+            <p>Each line shows M or V. Click to toggle. Red = mountain. Blue = valley.</p>
           </div>
         </div>
         <div class="step">
@@ -128,14 +136,14 @@
           <span class="step-num">06</span>
           <div class="step-text">
             <strong>save your fold</strong>
-            <p>When you are done, click "save fold". Enter your name and why you chose this community. Your fold becomes part of the permanent archive.</p>
+            <p>Click "save fold", enter your name, community, and why you chose it. Pick a pin colour. Your fold joins the permanent archive.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── SAVE FOLD OVERLAY ───────────────────────────────────────────────── -->
+  <!-- SAVE FOLD -->
   <div id="overlay-save" class="overlay hidden">
     <div class="overlay-box">
       <div class="overlay-header">
@@ -156,6 +164,17 @@
           <label for="save-reason">why did you choose this place?</label>
           <textarea id="save-reason" rows="3" placeholder="A few words about your connection to this place…"></textarea>
         </div>
+        <div class="form-field">
+          <label>choose your pin colour</label>
+          <div id="colour-picker">
+            <button class="colour-opt selected" data-colour="#c0392b" style="background:#c0392b" title="red"></button>
+            <button class="colour-opt" data-colour="#2563a8" style="background:#2563a8" title="blue"></button>
+            <button class="colour-opt" data-colour="#27ae60" style="background:#27ae60" title="green"></button>
+            <button class="colour-opt" data-colour="#f39c12" style="background:#f39c12" title="amber"></button>
+            <button class="colour-opt" data-colour="#8e44ad" style="background:#8e44ad" title="purple"></button>
+            <button class="colour-opt" data-colour="#1a1a1a" style="background:#1a1a1a" title="black"></button>
+          </div>
+        </div>
         <div class="form-actions">
           <button id="btn-save-confirm">add to archive</button>
           <button class="btn-cancel" data-close="overlay-save">cancel</button>
@@ -164,7 +183,7 @@
     </div>
   </div>
 
-  <!-- ── ARCHIVE OVERLAY ────────────────────────────────────────────────── -->
+  <!-- ARCHIVE -->
   <div id="overlay-archive" class="overlay hidden">
     <div class="overlay-box overlay-wide">
       <div class="overlay-header">
@@ -180,7 +199,7 @@
     </div>
   </div>
 
-  <!-- ── FOLD VIEWER OVERLAY ────────────────────────────────────────────── -->
+  <!-- VIEW FOLD -->
   <div id="overlay-view" class="overlay hidden">
     <div class="overlay-box">
       <div class="overlay-header">
@@ -191,6 +210,43 @@
         <p id="view-community" class="view-meta"></p>
         <p id="view-reason" class="view-reason"></p>
         <p id="view-date" class="view-date"></p>
+        <div class="view-actions">
+          <button id="view-see-fold" class="see-fold-btn">see how this folds →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPLACE FOLD WARNING (archive → your own) -->
+  <div id="overlay-warning" class="overlay hidden">
+    <div class="overlay-box overlay-small">
+      <div class="overlay-header">
+        <span class="overlay-title">REPLACE YOUR CURRENT FOLD?</span>
+        <button class="overlay-close" data-close="overlay-warning">×</button>
+      </div>
+      <div class="overlay-body">
+        <p class="save-intro">You have an unfinished fold in progress. Loading this archive fold will replace it. Your work will be lost unless you've already saved it.</p>
+        <div class="form-actions">
+          <button id="btn-warning-confirm">yes, load this fold</button>
+          <button class="btn-cancel" data-close="overlay-warning">cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div id="overlay-start-own" class="overlay hidden">
+    <div class="overlay-box overlay-small">
+      <div class="overlay-header">
+        <span class="overlay-title">THIS IS SOMEONE ELSE'S FOLD</span>
+        <button class="overlay-close" data-close="overlay-start-own">×</button>
+      </div>
+      <div class="overlay-body">
+        <p class="save-intro">You are viewing someone else's creation. Would you like to clear it and start your own fold?</p>
+        <div class="form-actions">
+          <button id="btn-start-own-confirm">yes, start my own</button>
+          <button class="btn-cancel" data-close="overlay-start-own">keep viewing</button>
+        </div>
       </div>
     </div>
   </div>

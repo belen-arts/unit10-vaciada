@@ -1,23 +1,25 @@
 // ── archive.js ────────────────────────────────────────────────────────────
-// Saves fold entries to localStorage and displays them as map markers + list.
 
 const STORAGE_KEY = 'vaciada_archive'
 
-let map         = null
-let markers     = []
+let map        = null
+let markers    = []
+let onLoadFold = null
+let activeEntryId = null  // id of fold currently being viewed
 
 
 // ── init ───────────────────────────────────────────────────────────────────
 
-export function initArchive(mapInstance) {
-  map = mapInstance
+export function initArchive(mapInstance, loadFoldCallback) {
+  map        = mapInstance
+  onLoadFold = loadFoldCallback
   renderMarkers()
 }
 
 
 // ── save ───────────────────────────────────────────────────────────────────
 
-export function saveFold({ name, community, reason, zone, lines }) {
+export function saveFold({ name, community, reason, colour, zone, lines }) {
   const entries = loadEntries()
 
   const entry = {
@@ -25,11 +27,10 @@ export function saveFold({ name, community, reason, zone, lines }) {
     name:      name.trim() || 'Anonymous',
     community: community.trim(),
     reason:    reason.trim(),
+    colour:    colour || '#c0392b',
     date:      new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' }),
-    // store zone centre for map marker
     lat:       (zone.nw.lat + zone.se.lat) / 2,
     lng:       (zone.nw.lng + zone.se.lng) / 2,
-    // store full zone + lines for viewing
     zone: {
       nw: { lat: zone.nw.lat, lng: zone.nw.lng },
       se: { lat: zone.se.lat, lng: zone.se.lng }
@@ -63,31 +64,57 @@ function loadEntries() {
 
 // ── map markers ────────────────────────────────────────────────────────────
 
-function renderMarkers() {
+export function renderMarkers() {
   if (!map) return
 
-  // remove old markers
   markers.forEach(m => m.remove())
   markers = []
 
   const entries = loadEntries()
 
   entries.forEach(entry => {
-    const el = document.createElement('div')
-    el.className = 'archive-marker'
-    el.textContent = entry.name
+    const colour = entry.colour || '#c0392b'
 
     const marker = L.marker([entry.lat, entry.lng], {
       icon: L.divIcon({
-        html: el.outerHTML,
-        className: '',
-        iconAnchor: [0, 0]
+        html: `<div style="
+          width: 28px;
+          height: 28px;
+          background: ${colour};
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+          cursor: pointer;
+        "></div>`,
+        className:  '',
+        iconSize:   [28, 28],
+        iconAnchor: [14, 14]
       })
     }).addTo(map)
 
     marker.on('click', () => showEntry(entry))
-    markers.push(marker)
+
+    // hide if currently being viewed
+    if (activeEntryId === entry.id) {
+      marker.setOpacity(0)
+    }
+
+    markers.push({ marker, id: entry.id })
   })
+}
+
+// hide the pin for the entry being viewed
+export function hideMarker(entryId) {
+  activeEntryId = entryId
+  markers.forEach(m => {
+    if (m.id === entryId) m.marker.setOpacity(0)
+  })
+}
+
+// restore all pins
+export function showAllMarkers() {
+  activeEntryId = null
+  markers.forEach(m => m.marker.setOpacity(1))
 }
 
 
@@ -103,16 +130,25 @@ export function renderArchiveList() {
   }
 
   list.innerHTML = ''
-  // newest first
   ;[...entries].reverse().forEach(entry => {
-    const item = document.createElement('div')
+    const colour = entry.colour || '#c0392b'
+    const item   = document.createElement('div')
     item.className = 'archive-item'
     item.innerHTML = `
-      <div class="archive-item-name">${entry.name}</div>
-      <div class="archive-item-community">${entry.community}</div>
-      <div class="archive-item-reason">${entry.reason}</div>
-      <div class="archive-item-date">${entry.date}</div>
+      <div class="archive-pin-dot" style="background:${colour}"></div>
+      <div class="archive-item-content">
+        <div class="archive-item-name">${entry.name}</div>
+        <div class="archive-item-community">${entry.community}</div>
+        <div class="archive-item-reason">${entry.reason}</div>
+        <div class="archive-item-date">${entry.date}</div>
+        <button class="see-fold-btn" style="border-color:${colour};color:${colour}">see this fold →</button>
+      </div>
     `
+    item.querySelector('.see-fold-btn').addEventListener('click', e => {
+      e.stopPropagation()
+      closeOverlay('overlay-archive')
+      triggerLoadFold(entry)
+    })
     item.addEventListener('click', () => {
       closeOverlay('overlay-archive')
       showEntry(entry)
@@ -123,14 +159,33 @@ export function renderArchiveList() {
 }
 
 
-// ── view entry ─────────────────────────────────────────────────────────────
+// ── show entry popup ───────────────────────────────────────────────────────
 
 function showEntry(entry) {
+  const colour = entry.colour || '#c0392b'
+
   document.getElementById('view-title').textContent     = entry.name
   document.getElementById('view-community').textContent = entry.community
   document.getElementById('view-reason').textContent    = entry.reason
   document.getElementById('view-date').textContent      = entry.date
+
+  const seeFoldBtn = document.getElementById('view-see-fold')
+  seeFoldBtn.style.borderColor = colour
+  seeFoldBtn.style.color       = colour
+  seeFoldBtn._entry            = entry
+
   openOverlay('overlay-view')
+}
+
+
+// ── load fold ─────────────────────────────────────────────────────────────
+
+function triggerLoadFold(entry) {
+  if (!onLoadFold) return
+  closeOverlay('overlay-view')
+  hideMarker(entry.id)
+  if (map) map.setView([entry.lat, entry.lng], 15)
+  onLoadFold(entry)
 }
 
 
@@ -138,3 +193,11 @@ function showEntry(entry) {
 
 function openOverlay(id)  { document.getElementById(id).classList.remove('hidden') }
 function closeOverlay(id) { document.getElementById(id).classList.add('hidden') }
+
+export function initViewFoldButton() {
+  const btn = document.getElementById('view-see-fold')
+  if (!btn) return
+  btn.addEventListener('click', () => {
+    if (btn._entry) triggerLoadFold(btn._entry)
+  })
+}
