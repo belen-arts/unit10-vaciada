@@ -6,11 +6,10 @@ const STATUS = document.getElementById('status')
 export function initMap(containerId) {
   const map = L.map(containerId, { zoomControl: true })
     .setView([40.1, -6.0], 13)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(map)
-
   return map
 }
 
