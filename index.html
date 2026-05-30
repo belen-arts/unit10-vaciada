@@ -17,11 +17,13 @@
     <div id="topbar">
       <span class="wordmark">VACIADA /</span>
       <div id="search-wrap">
-        <input id="place-input" type="text" placeholder="search a place — granadilla, españa…" />
+        <input id="place-input" type="text" placeholder="search for a place or community…" />
         <button id="search-btn">search</button>
       </div>
+      <button class="top-btn" id="btn-about">about</button>
       <button class="top-btn" id="btn-instructions">instructions</button>
       <button class="top-btn" id="btn-archive">archive</button>
+      <button class="top-btn" id="btn-feedback">feedback</button>
     </div>
 
     <div id="toolbar">
@@ -86,6 +88,33 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div id="overlay-about" class="overlay hidden">
+    <div class="overlay-box overlay-wide">
+      <div class="overlay-header">
+        <span class="overlay-title">VACIADA — LOS QUE QUEDAN</span>
+        <button class="overlay-close" data-close="overlay-about">×</button>
+      </div>
+      <div class="overlay-body about-body">
+        <div class="about-text">
+          <p class="about-question">Can cloth hold what a community has lost?</p>
+          <p>Vaciada: Los que quedan is a series of woven textile objects structurally generated from the geographic data of depopulated Spanish towns. Spain has experienced one of the most severe rural depopulation crises in Europe. Entire communities have been erased, by civil war, by flooding, by state decree, by slow economic migration. What remains is data. The towns persist as information. The communities do not.</p>
+          <p>Each object is not designed, it is a direct physical consequence of its site. Street layouts determine folding and creasing. Elevation becomes density and weight. Nothing is decorative. Everything is a translation.</p>
+          <p>This tool is part of that project. It invites you to choose your own community anywhere in the world and translate its geography into a fold. Your fold joins a permanent archive alongside everyone else who has used this tool. You become the next maker.</p>
+        </div>
+        <div class="about-qr">
+          <p class="qr-label">open source — explore and add to the community </p>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/belen-arts/unit10-vaciada&color=2d5c52&bgcolor=f5f3ee"
+            alt="QR code to GitHub repository"
+            class="qr-img"
+          />
+          <p class="qr-url">github.com/belen-arts/<br>unit10-vaciada</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -154,7 +183,7 @@
         <p class="save-intro">Your fold will be added to the permanent archive and visible to everyone who uses this tool.</p>
         <div class="form-field">
           <label for="save-name">your name</label>
-          <input type="text" id="save-name" placeholder="e.g. María, Anonymous…" />
+          <input type="text" id="save-name" placeholder="" />
         </div>
         <div class="form-field">
           <label for="save-community">community you chose</label>
@@ -192,9 +221,7 @@
       </div>
       <div class="overlay-body">
         <p class="save-intro">Every fold made with this tool. Click an entry to see it on the map.</p>
-        <div id="archive-list">
-          <p class="empty-msg">no folds saved yet.</p>
-        </div>
+        <div id="archive-list"></div>
       </div>
     </div>
   </div>
@@ -217,7 +244,7 @@
     </div>
   </div>
 
-  <!-- REPLACE FOLD WARNING (archive → your own) -->
+  <!-- REPLACE FOLD WARNING -->
   <div id="overlay-warning" class="overlay hidden">
     <div class="overlay-box overlay-small">
       <div class="overlay-header">
@@ -225,7 +252,7 @@
         <button class="overlay-close" data-close="overlay-warning">×</button>
       </div>
       <div class="overlay-body">
-        <p class="save-intro">You have an unfinished fold in progress. Loading this archive fold will replace it. Your work will be lost unless you've already saved it.</p>
+        <p class="save-intro">You have an unfinished fold in progress. Loading this archive fold will replace it.</p>
         <div class="form-actions">
           <button id="btn-warning-confirm">yes, load this fold</button>
           <button class="btn-cancel" data-close="overlay-warning">cancel</button>
@@ -234,7 +261,33 @@
     </div>
   </div>
 
-  
+  <!-- FEEDBACK -->
+<div id="overlay-feedback" class="overlay hidden">
+  <div class="overlay-box">
+    <div class="overlay-header">
+      <span class="overlay-title">LEAVE FEEDBACK</span>
+      <button class="overlay-close" data-close="overlay-feedback">×</button>
+    </div>
+    <div class="overlay-body">
+      <p class="save-intro">Share your thoughts, suggestions, or reactions to Vaciada. All feedback is public and visible to everyone.</p>
+      <div class="form-field">
+        <label for="feedback-name">your name (optional)</label>
+        <input type="text" id="feedback-name" placeholder="" />
+      </div>
+      <div class="form-field">
+        <label for="feedback-message">your message</label>
+        <textarea id="feedback-message" rows="4" placeholder="What do you think? What community would you add? What does this tool make you feel?"></textarea>
+      </div>
+      <div class="form-actions">
+        <button id="btn-feedback-confirm">submit</button>
+        <button class="btn-cancel" data-close="overlay-feedback">cancel</button>
+      </div>
+      <div id="feedback-list" style="margin-top: 24px; border-top: 2px solid #e0dbd0; padding-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+  </div>
+</div>
+
+  <!-- START YOUR OWN WARNING -->
   <div id="overlay-start-own" class="overlay hidden">
     <div class="overlay-box overlay-small">
       <div class="overlay-header">
@@ -254,6 +307,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
   <script type="module" src="main.js"></script>
+
 
 </body>
 </html>

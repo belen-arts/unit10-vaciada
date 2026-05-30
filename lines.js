@@ -42,10 +42,7 @@ export function initCanvas(mapInstance) {
   btnPan.addEventListener('click', () => setMode('pan'))
 
   btnZone.addEventListener('click', () => {
-    if (isReadOnly) {
-      exitReadOnly()
-      return
-    }
+    if (isReadOnly) { exitReadOnly(); return }
     if (zoneBounds) { setStatus('clear zone first to redraw'); return }
     setMode('zone')
   })
@@ -60,22 +57,14 @@ export function initCanvas(mapInstance) {
   })
 
   btnClearZone.addEventListener('click', () => {
-    if (isReadOnly) {
-      window.showStartOwnWarning?.()
-      return
-    }
+    if (isReadOnly) { window.showStartOwnWarning?.(); return }
     resetAll()
   })
 
-  btnCloseFold?.addEventListener('click', () => {
-    window.onCloseFold?.()
-  })
+  btnCloseFold?.addEventListener('click', () => { window.onCloseFold?.() })
 
   clearBtn.addEventListener('click', () => {
-    if (isReadOnly) {
-      window.showStartOwnWarning?.()
-      return
-    }
+    if (isReadOnly) { window.showStartOwnWarning?.(); return }
     lines     = []
     lineStart = null
     renderList()
@@ -88,9 +77,8 @@ export function initCanvas(mapInstance) {
 // ── read-only mode ─────────────────────────────────────────────────────────
 
 function setReadOnlyUI(on) {
-  // hide save fold, show close fold when read-only
-  if (btnSave)      btnSave.style.display      = on ? 'none'  : ''
-  if (btnCloseFold) btnCloseFold.style.display  = on ? ''      : 'none'
+  if (btnSave)      btnSave.style.display     = on ? 'none' : ''
+  if (btnCloseFold) btnCloseFold.style.display = on ? ''     : 'none'
 }
 
 function exitReadOnly() {
@@ -226,6 +214,12 @@ function angleDeg(x1, y1, x2, y2) {
   return Math.round(a * 10) / 10
 }
 
+function shakeStatus() {
+  const statusEl = document.getElementById('status')
+  statusEl.classList.add('shake')
+  statusEl.addEventListener('animationend', () => statusEl.classList.remove('shake'), { once: true })
+}
+
 
 // ── mode ───────────────────────────────────────────────────────────────────
 
@@ -277,14 +271,29 @@ function onContainerClick(e) {
     } else {
       const p1 = llToXY(zoneFirst)
       const r  = rectFromPoints(p1.x, p1.y, x, y)
-      if (r.w > 10 && r.h > 10) {
-        zoneBounds = {
-          nw: xyToLL(Math.min(p1.x, x), Math.min(p1.y, y)),
-          se: xyToLL(Math.max(p1.x, x), Math.max(p1.y, y))
-        }
+
+      // check real-world size — max 8km × 8km
+      const nw = xyToLL(Math.min(p1.x, x), Math.min(p1.y, y))
+      const se = xyToLL(Math.max(p1.x, x), Math.max(p1.y, y))
+      const ne = xyToLL(Math.max(p1.x, x), Math.min(p1.y, y))
+      const sw = xyToLL(Math.min(p1.x, x), Math.max(p1.y, y))
+
+      const widthM  = nw.distanceTo(ne)
+      const heightM = nw.distanceTo(sw)
+
+      if (widthM > 8000 || heightM > 8000) {
         zoneFirst = null
-        lines     = []
-        lineStart = null
+        setStatus('zone too large — max 8km × 8km, zoom in')
+        shakeStatus()
+        redraw()
+        return
+      }
+
+      if (r.w > 10 && r.h > 10) {
+        zoneBounds = { nw, se }
+        zoneFirst  = null
+        lines      = []
+        lineStart  = null
         renderList()
         setStatus('zone set — click an edge to start a fold line')
         setMode('draw')
@@ -292,6 +301,7 @@ function onContainerClick(e) {
         zoneFirst = null
         setStatus('zone too small — click first corner again')
       }
+
       redraw()
     }
     return
@@ -316,7 +326,7 @@ function onContainerClick(e) {
       lines.push({ start: lineStart, end: ll, angle, fold: 'M' })
       lineStart = null
       previewPt = null
-      setStatus('line added — toggle M/V in sidebar, or add next line')
+      setStatus('line added — click edge for next')
       renderList()
       redraw()
       window.onLinesChanged?.()

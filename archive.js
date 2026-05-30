@@ -1,11 +1,12 @@
 // ── archive.js ────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'vaciada_archive'
+const STORAGE_KEY  = 'vaciada_archive'
+const MAX_ENTRIES  = 25
 
 let map        = null
 let markers    = []
 let onLoadFold = null
-let activeEntryId = null  // id of fold currently being viewed
+let activeEntryId = null
 
 
 // ── init ───────────────────────────────────────────────────────────────────
@@ -47,6 +48,12 @@ export function saveFold({ name, community, reason, colour, zone, lines }) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
   renderMarkers()
   renderArchiveList()
+
+  // auto-refresh at 25 entries to keep things clean
+  if (entries.length >= MAX_ENTRIES) {
+    setTimeout(() => { location.reload() }, 1500)
+  }
+
   return entry
 }
 
@@ -55,7 +62,14 @@ export function saveFold({ name, community, reason, colour, zone, lines }) {
 
 function loadEntries() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    // keep only the most recent MAX_ENTRIES
+    if (all.length > MAX_ENTRIES) {
+      const trimmed = all.slice(-MAX_ENTRIES)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed))
+      return trimmed
+    }
+    return all
   } catch {
     return []
   }
@@ -67,7 +81,7 @@ function loadEntries() {
 export function renderMarkers() {
   if (!map) return
 
-  markers.forEach(m => m.remove())
+  markers.forEach(m => m.marker.remove())
   markers = []
 
   const entries = loadEntries()
@@ -94,24 +108,17 @@ export function renderMarkers() {
 
     marker.on('click', () => showEntry(entry))
 
-    // hide if currently being viewed
-    if (activeEntryId === entry.id) {
-      marker.setOpacity(0)
-    }
+    if (activeEntryId === entry.id) marker.setOpacity(0)
 
     markers.push({ marker, id: entry.id })
   })
 }
 
-// hide the pin for the entry being viewed
 export function hideMarker(entryId) {
   activeEntryId = entryId
-  markers.forEach(m => {
-    if (m.id === entryId) m.marker.setOpacity(0)
-  })
+  markers.forEach(m => { if (m.id === entryId) m.marker.setOpacity(0) })
 }
 
-// restore all pins
 export function showAllMarkers() {
   activeEntryId = null
   markers.forEach(m => m.marker.setOpacity(1))
@@ -163,17 +170,14 @@ export function renderArchiveList() {
 
 function showEntry(entry) {
   const colour = entry.colour || '#c0392b'
-
   document.getElementById('view-title').textContent     = entry.name
   document.getElementById('view-community').textContent = entry.community
   document.getElementById('view-reason').textContent    = entry.reason
   document.getElementById('view-date').textContent      = entry.date
-
   const seeFoldBtn = document.getElementById('view-see-fold')
   seeFoldBtn.style.borderColor = colour
   seeFoldBtn.style.color       = colour
   seeFoldBtn._entry            = entry
-
   openOverlay('overlay-view')
 }
 
@@ -187,9 +191,6 @@ function triggerLoadFold(entry) {
   if (map) map.setView([entry.lat, entry.lng], 15)
   onLoadFold(entry)
 }
-
-
-// ── helpers ────────────────────────────────────────────────────────────────
 
 function openOverlay(id)  { document.getElementById(id).classList.remove('hidden') }
 function closeOverlay(id) { document.getElementById(id).classList.add('hidden') }

@@ -38,7 +38,6 @@ async function search() {
 
 searchBtn.addEventListener('click', search)
 input.addEventListener('keydown', e => { if (e.key === 'Enter') search() })
-input.value = 'Granadilla, Cáceres'
 search()
 
 // ── fold preview sync ─────────────────────────────────────────────────────
@@ -55,17 +54,20 @@ document.getElementById('fold-slider').addEventListener('input', e => {
 
 // ── nav overlays ──────────────────────────────────────────────────────────
 
+document.getElementById('btn-about').addEventListener('click',        () => openOverlay('overlay-about'))
 document.getElementById('btn-instructions').addEventListener('click', () => openOverlay('overlay-instructions'))
-
 document.getElementById('btn-archive').addEventListener('click', () => {
   renderArchiveList()
   openOverlay('overlay-archive')
+})
+document.getElementById('btn-feedback').addEventListener('click', () => {
+  renderFeedbackList()
+  openOverlay('overlay-feedback')
 })
 
 document.querySelectorAll('[data-close]').forEach(b => {
   b.addEventListener('click', () => closeOverlay(b.dataset.close))
 })
-
 document.querySelectorAll('.overlay').forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closeOverlay(overlay.id)
@@ -84,6 +86,14 @@ document.querySelectorAll('.colour-opt').forEach(b => {
   })
 })
 
+// ── shake helper ──────────────────────────────────────────────────────────
+
+function shakeField(el) {
+  el.classList.add('field-error', 'shake')
+  el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true })
+  el.addEventListener('input', () => el.classList.remove('field-error'), { once: true })
+}
+
 // ── save fold ─────────────────────────────────────────────────────────────
 
 document.getElementById('btn-save').addEventListener('click', () => {
@@ -98,47 +108,39 @@ document.getElementById('btn-save').addEventListener('click', () => {
 })
 
 document.getElementById('btn-save-confirm').addEventListener('click', () => {
-  const name      = document.getElementById('save-name').value.trim()
-  const community = document.getElementById('save-community').value.trim()
-  const reason    = document.getElementById('save-reason').value.trim()
+  const nameEl      = document.getElementById('save-name')
+  const communityEl = document.getElementById('save-community')
+  const reasonEl    = document.getElementById('save-reason')
 
-  if (!community) {
-    document.getElementById('save-community').style.borderColor = '#c0392b'
-    document.getElementById('save-community').focus()
-    return
-  }
+  const name      = nameEl.value.trim()
+  const community = communityEl.value.trim()
+  const reason    = reasonEl.value.trim()
 
-  // close overlay immediately
+  let valid = true
+  if (!name)      { shakeField(nameEl);      valid = false }
+  if (!community) { shakeField(communityEl); valid = false }
+  if (!reason)    { shakeField(reasonEl);    valid = false }
+  if (!valid) return
+
   closeOverlay('overlay-save')
 
-  // save to archive
-  saveFold({
-    name,
-    community,
-    reason,
-    colour: selectedColour,
-    zone:   getZone(),
-    lines:  getLines()
-  })
+  saveFold({ name, community, reason, colour: selectedColour, zone: getZone(), lines: getLines() })
 
-  // reset form fields
-  document.getElementById('save-name').value            = ''
-  document.getElementById('save-community').value       = ''
-  document.getElementById('save-reason').value          = ''
-  document.getElementById('save-community').style.borderColor = ''
+  nameEl.value      = ''
+  communityEl.value = ''
+  reasonEl.value    = ''
+  nameEl.classList.remove('field-error')
+  communityEl.classList.remove('field-error')
+  reasonEl.classList.remove('field-error')
 
-  document.getElementById('status').textContent = `fold saved — thank you, ${name || 'anonymous'}`
-
-  // clear map drawing and simulation
+  document.getElementById('status').textContent = `fold saved — thank you, ${name}`
   resetAll()
   clearFoldPreview()
-
-  // reset slider
   document.getElementById('fold-slider').value = 0
   document.getElementById('fold-pct').textContent = '0%'
 })
 
-// ── close fold (when viewing someone else's) ──────────────────────────────
+// ── close fold ────────────────────────────────────────────────────────────
 
 function closeFold() {
   showAllMarkers()
@@ -190,6 +192,65 @@ function doLoadFold(entry) {
   document.getElementById('fold-pct').textContent = '0%'
   map.setView([entry.lat, entry.lng], 15)
 }
+
+// ── feedback ──────────────────────────────────────────────────────────────
+
+const FEEDBACK_KEY = 'vaciada_feedback'
+
+function loadFeedback() {
+  try { return JSON.parse(localStorage.getItem(FEEDBACK_KEY) || '[]') } catch { return [] }
+}
+
+function saveFeedbackEntry({ name, message }) {
+  const entries = loadFeedback()
+  entries.push({
+    name:    name.trim() || 'Anonymous',
+    message: message.trim(),
+    date:    new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' })
+  })
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(entries))
+}
+
+function renderFeedbackList() {
+  const list    = document.getElementById('feedback-list')
+  const entries = loadFeedback()
+
+  if (!entries.length) {
+    list.innerHTML = '<p class="empty-msg">no feedback yet, be the first!</p>'
+    return
+  }
+
+  list.innerHTML = ''
+  ;[...entries].reverse().forEach(entry => {
+    const item = document.createElement('div')
+    item.className = 'feedback-item'
+    item.innerHTML = `
+      <div class="feedback-name">${entry.name}</div>
+      <div class="feedback-message">${entry.message}</div>
+      <div class="feedback-date">${entry.date}</div>
+    `
+    list.appendChild(item)
+  })
+}
+
+document.getElementById('btn-feedback-confirm').addEventListener('click', () => {
+  const nameEl    = document.getElementById('feedback-name')
+  const messageEl = document.getElementById('feedback-message')
+
+  const name    = nameEl.value.trim()
+  const message = messageEl.value.trim()
+
+  if (!message) { shakeField(messageEl); return }
+
+  saveFeedbackEntry({ name, message })
+
+  nameEl.value    = ''
+  messageEl.value = ''
+  messageEl.classList.remove('field-error')
+
+  closeOverlay('overlay-feedback')
+  document.getElementById('status').textContent = 'feedback received — thank you'
+})
 
 // ── resizable divider ─────────────────────────────────────────────────────
 
