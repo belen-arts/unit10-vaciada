@@ -148,6 +148,7 @@ export function resetAll() {
   setMode('pan')
   redraw()
   window.onLinesChanged?.()
+  setTimeout(() => map.invalidateSize(), 100)
 }
 
 export function hasActiveWork() {
